@@ -17,7 +17,7 @@
    * Initializes the page by setting up event listeners.
    */
   function init() {
-    id("view-list").addEventListener("click", () => fetchAllDeals());
+    id("view-list").addEventListener("click", fetchAllDeals);
     id("search-deals").addEventListener("click", () => switchView(id("game-view")));
     qsa(".go-back").forEach(button => {
       button.addEventListener("click", () => switchView(id("introduction")));
@@ -27,7 +27,7 @@
       if (gameName) {
         fetchDealsByGameName(gameName);
       } else {
-        displayError(id("game-view"), "Please enter a game name to search for deals.");
+        handleError(new Error("Please enter a game name to search for deals."));
       }
     });
   }
@@ -75,12 +75,31 @@
   }
 
   /**
-   * Handles errors during fetch operations.
-   * @param {Error} error - The error that occurred.
+   * Handles errors during fetch operations by dynamically creating and displaying error messages
+   * within the application UI, including a back button to navigate to the main view.
+   * @param {Error} error - The error that occurred during a fetch operation.
    */
   function handleError(error) {
-    console.error("Fetch error:", error);
-    alert("An error occurred while fetching data. Please try again later.");
+    const currentView = document.querySelector('.view.active');
+    currentView.innerHTML = '';
+
+    const errorText = document.createElement("p");
+    errorText.innerText = "An error occurred! Please try again later.";
+
+    const detailedErrorText = document.createElement("p");
+    detailedErrorText.innerText = `Error Details: ${error.message}`;
+
+    const backButton = document.createElement("button");
+    backButton.textContent = "Back";
+    backButton.classList.add("go-back");
+
+    currentView.appendChild(errorText);
+    currentView.appendChild(detailedErrorText);
+    currentView.appendChild(backButton);
+
+    backButton.addEventListener("click", () => switchView(id("game-view")));
+
+    switchView(id("introduction"));
   }
 
   /**
